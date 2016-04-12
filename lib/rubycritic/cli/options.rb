@@ -14,6 +14,20 @@ module Rubycritic
         @parser.new do |opts|
           opts.banner = 'Usage: rubycritic [options] [paths]'
 
+          opts.on(
+            '--analysers [ANALYSERS]',
+            Array,
+            'List of analysers to use (uses all if none provided):',
+            '  flay',
+            '  flog',
+            '  reek',
+            '  complexity',
+            '  attributes',
+            '  churn'
+          ) do |list|
+            @analysers = list
+          end
+
           opts.on('-p', '--path [PATH]', 'Set path where report will be saved (tmp/rubycritic by default)') do |path|
             @root = path
           end
@@ -62,6 +76,7 @@ module Rubycritic
 
       def to_h
         {
+          analysers: @analysers,
           mode: @mode,
           root: @root,
           format: @format,

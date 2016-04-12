@@ -1,10 +1,11 @@
 module Rubycritic
   class Configuration
     attr_reader :root
-    attr_accessor :source_control_system, :mode, :format, :deduplicate_symlinks,
-                  :suppress_ratings, :open_with, :no_browser
+    attr_accessor :source_control_system, :analysers, :mode, :format,
+                  :deduplicate_symlinks, :suppress_ratings, :open_with, :no_browser
 
     def set(options)
+      self.analysers = options[:analysers] || %w[flay flog reek complexity attributes churn]
       self.mode = options[:mode] || :default
       self.root = options[:root] || 'tmp/rubycritic'
       self.format = options[:format] || :html
