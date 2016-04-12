@@ -35,17 +35,17 @@ module Rubycritic
             file.add_attribute 'name', File.realpath(name)
             smells.each do |smell|
               smell.locations.each do |location|
-                file << error(smell, location.line)
+                file << error(smell, location.pathname, location.line)
               end
             end
           end
         end
 
-        def error(smell, line)
+        def error(smell, pathname, line)
           REXML::Element.new('error').tap do |error|
             error.add_attributes 'column' => 0,
               'line'     => line,
-              'message'  => smell.message,
+              'message'  => "#{smell.message} (#{pathname}:#{line})",
               'severity' => 'warning',
               'source'   => smell.type
           end
