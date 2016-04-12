@@ -17,12 +17,21 @@ module Rubycritic
       Analyser::Churn
     ].freeze
 
+    ANALYSER_MAP = {
+      'flay' => Analyser::FlaySmells,
+      'flog' => Analyser::FlogSmells,
+      'reek' => Analyser::ReekSmells,
+      'complexity' => Analyser::Complexity,
+      'attributes' => Analyser::Attributes,
+      'churn' => Analyser::Churn
+    }.freeze
+
     def initialize(paths)
       @paths = paths
     end
 
     def run
-      ANALYSERS.each do |analyser_class|
+      chosen_analysers.each do |analyser_class|
         analyser_instance = analyser_class.new(analysed_modules)
         puts "running #{analyser_instance}"
         analyser_instance.run
@@ -32,6 +41,16 @@ module Rubycritic
 
     def analysed_modules
       @analysed_modules ||= AnalysedModulesCollection.new(@paths)
+    end
+
+    private
+
+    def chosen_analysers
+      Config.analysers.map do |analyser|
+        ANALYSER_MAP[analyser].tap do |analyser_class|
+          raise 'Unknown analiser!' if analyser_class.nil?
+        end
+      end
     end
   end
 end
