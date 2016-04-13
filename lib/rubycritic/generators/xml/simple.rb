@@ -33,22 +33,33 @@ module Rubycritic
         def file(name, smells)
           REXML::Element.new('file').tap do |file|
             file.add_attribute 'name', File.realpath(name)
+
             smells.each do |smell|
-              smell.locations.each do |location|
-                file << error(smell, location.pathname, location.line)
-              end
+              file << error(smell, name)
             end
           end
         end
 
-        def error(smell, pathname, line)
+        def error(smell, analysed_path)
           REXML::Element.new('error').tap do |error|
             error.add_attributes 'column' => 0,
-              'line'     => line,
-              'message'  => "#{smell.message} (#{pathname}:#{line})",
+              'line'     => smell_line(analysed_path, smell.locations),
+              'message'  => "#{smell.message} (#{ smell_locations_string(smell.locations) })",
               'severity' => 'warning',
               'source'   => smell.type
           end
+        end
+
+        def smell_line(analysed_path, locations)
+          locations.each do |location|
+            return location.line if location.pathname.to_s == analysed_path
+          end
+
+          0 # Let's hope this won't happen
+        end
+
+        def smell_locations_string(locations)
+          [ locations.map { |location| "#{location.pathname}:#{location.line}" } ].join(", ")
         end
       end
     end
